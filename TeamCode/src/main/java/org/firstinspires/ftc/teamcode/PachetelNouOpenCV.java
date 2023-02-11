@@ -42,7 +42,6 @@ public class PachetelNouOpenCV extends OpenCvPipeline {
     private final int elementType = Imgproc.CV_SHAPE_RECT;
     //asta e un dreptunghi(Rect = dreptunghi pentru webcam)
     private Rect dreptunghi;
-    private Rect gol;
     /*
      * NOTE: if you wish to use additional Mat objects in your processing pipeline, it is
      * highly recommended to declare them here as instance variables and re-use them for
@@ -98,7 +97,7 @@ public class PachetelNouOpenCV extends OpenCvPipeline {
             //aceasta linie de cod face un dreptunghi cat webcam-ul de mare si negru
             Mat rect = new Mat(input.rows(), input.cols(), input.type(), Scalar.all(0));
 
-            //face un dreptunghi care stabileste zona de detectare
+            //face un dreptunghi care acopera toata aria de detectare cu alb
             Imgproc.rectangle(
                     rect,
                     new Point(CV_rect_x1, CV_rect_y1),
@@ -106,7 +105,7 @@ public class PachetelNouOpenCV extends OpenCvPipeline {
                     new Scalar(255),
                     Imgproc.FILLED
             );
-            //aici se conveerteste culoarea in alb-negru, albul fiind chestiile detectate
+            //aici se converteste culoarea in alb-negru, albul fiind chestiile detectate
             Core.bitwise_and(input, rect, input);
 
             //asta declara o lista de contururi;
@@ -132,10 +131,10 @@ public class PachetelNouOpenCV extends OpenCvPipeline {
             Core.bitwise_or(input, original, input);
 
             //deseneaza toate contururile, con
-            // tourldx=-1 inseamna ca sunt desenate TOATE contururile.
+            // cotourldx=-1 inseamna ca sunt desenate TOATE contururile.
             Imgproc.drawContours(input, contours, -1, new Scalar(0, 255, 0), 4);
 
-            //aici se deseneaza dreeptunghiul care stabileste aria de detectare
+            //aici se deseneaza dreeptunghiul care arata aria de detectare
             Imgproc.rectangle(
                     input,
                     new Point(CV_rect_x1, CV_rect_y1),
@@ -147,7 +146,7 @@ public class PachetelNouOpenCV extends OpenCvPipeline {
                     input,
                     getRect(),
                     new Scalar(0, 255, 255), 4);
-            //aici se elimina toate contururile din aceste mat-uri;
+            //aici se elimina toate modificarile din aceste mat-uri;
             original.release();
             rect.release();
             //se returneaza input-ul modificat

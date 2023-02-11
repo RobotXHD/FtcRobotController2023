@@ -6,20 +6,15 @@ import static java.lang.Thread.sleep;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 @TeleOp
-public class PP_OCTOTOWER extends OpMode {
+public class PowerPlay_MECHTOWER extends OpMode {
     private DcMotorEx motorBL;
     private DcMotorEx motorBR;
     private DcMotorEx motorFL;
@@ -28,7 +23,7 @@ public class PP_OCTOTOWER extends OpMode {
     private DcMotorEx alecsticulator1,alecsticulator2;
     private Servo claw;
     private Servo supramax;
-    double sm = 1, ms = 2;
+    double sm = 1, ms = 1.5,ms2 = 1;
     private BNO055IMU imu;
     double y, x, rx, rx2;
     double max = 0;
@@ -36,8 +31,8 @@ public class PP_OCTOTOWER extends OpMode {
     double pmotorBR;
     double pmotorFL;
     double pmotorFR;
-    double colagen=0.3, lastTime;
-    private boolean alast,lblast = false,rblast = false, slay=false;
+    double colagen=0, lastTime;
+    private boolean alast,lblast = false,rblast = false, slay=false,ylast;
     boolean v = true,ok1,ok2=false,ok3,ok4,ok5,ok6,ok7;
     private boolean stop=false,setSetpoint=false,setsetSetpoint=false;
     int okGrip = 1, okClaw = 1;
@@ -45,7 +40,7 @@ public class PP_OCTOTOWER extends OpMode {
     public int cn=0;
     private double correction=0;
     public ElapsedTime timer = new ElapsedTime();
-    double timeLimit = 0.25, lbcn=0,rbcn=0,acn=0;
+    double timeLimit = 0.25, lbcn=0,rbcn=0,acn=0,ycn=0;
     int loaderState = -1;
     private int apoz = 0;
     private long spasmCurrentTime = 0;
@@ -73,15 +68,6 @@ public class PP_OCTOTOWER extends OpMode {
         motor.setPower(0);
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-    public void targetstop(int poz, double pow, DcMotorEx motor){
-        motor.setTargetPosition(poz);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(pow);
-        while (motor.isBusy());
-        motor.setPower(0);
-        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-    }
     public void mamplicitisit(int poz1, double pow1){
         alecsticulator1.setTargetPosition(poz1);
         alecsticulator2.setTargetPosition(-poz1);
@@ -94,12 +80,6 @@ public class PP_OCTOTOWER extends OpMode {
         alecsticulator2.setPower(0);
         alecsticulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         alecsticulator2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-    public void kdf(int t){
-        lastTime=System.currentTimeMillis();
-        while(lastTime + t < System.currentTimeMillis()){
-
-        }
     }
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -248,7 +228,12 @@ public class PP_OCTOTOWER extends OpMode {
                 }
                 lblast = gamepad1.left_bumper;
                 rblast = gamepad1.right_bumper;
-
+                if(gamepad1.a){
+                    turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    alecsticulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    alecsticulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    ecstensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                }
                 if(sm==3){
                     POWER(pmotorFR/1.5, pmotorFL/1.5, pmotorBR/1.5, pmotorBL/1.5);
                 }
@@ -266,7 +251,7 @@ public class PP_OCTOTOWER extends OpMode {
         public void run() {
             while (!stop) {
                 //if(ecstensor.getCurrentPosition() < 300) {
-                ecstensor.setPower(gamepad2.left_stick_y/1.5/ms);
+                ecstensor.setPower(gamepad2.left_stick_y/ms2);
                 if (gamepad2.x != alast) {
                     acn++;
                 }
@@ -274,31 +259,49 @@ public class PP_OCTOTOWER extends OpMode {
                     acn = 0;
                 }
                 if(acn==2) {
-                    ms = 2;
+                    ms = 3;
                 }
                 else if(acn==0){
-                    ms = 1;
+                    ms = 1.5;
                 }
                 alast = gamepad2.x;
+                if (gamepad2.y != ylast) {
+                    ycn++;
+                }
+                if(ycn>=4){
+                    ycn = 0;
+                }
+                if(ycn==2) {
+                    ms2 = 3;
+                }
+                else if(ycn==0){
+                    ms2 = 1.7;
+                }
+                if(gamepad2.dpad_left){
+                    target(1500,0.4,turela);
+                }
+                ylast = gamepad2.y;
                 alecsticulator1.setPower(gamepad2.right_stick_y);
                 alecsticulator2.setPower(-gamepad2.right_stick_y);
                 if(touchL.getState() && touchR.getState()) {
-                    turela.setPower(gamepad2.left_trigger/2 - gamepad2.right_trigger/2);
+                    turela.setPower((gamepad2.left_trigger/ms - gamepad2.right_trigger/ms)/1.4);
                 }
                 else if(!touchR.getState() && !inAutomatizare) {
-                    turela.setPower(0);
+                    turela.setPower(-0.06);
+                    inAutomatizare = true;
                 }
                 else if(!touchL.getState() && !inAutomatizare){
-                    turela.setPower(0);
+                    turela.setPower(0.06);
+                    inAutomatizare = true;
                 }
-                if(gamepad2.left_bumper){
-                    colagen-=0.005;
-                }
-                if(gamepad2.right_bumper){
+                inAutomatizare = false;
+                if(gamepad2.left_bumper && colagen <= 1){
                     colagen+=0.005;
                 }
-                supramax.setPosition(colagen);
-
+                if(gamepad2.right_bumper && colagen >= 0){
+                    colagen-=0.005;
+                }
+                supramax.setPosition(1-colagen);
                 if(gamepad2.a /*&& colagen >= 0.01*/) {
                     //colagen -= 0.005;
                     claw.setPosition(0.2);
@@ -386,6 +389,7 @@ public class PP_OCTOTOWER extends OpMode {
         telemetry.addData("alecsticulator1:", alecsticulator1.getPower());
         telemetry.addData("alecsticulator1:", alecsticulator2.getPower());
         telemetry.addData("supramax:", supramax.getPosition());
+        telemetry.addData("colagen:", colagen);
         telemetry.addData("claw:", claw.getPosition());
         telemetry.addData("pozitie turela", turela.getCurrentPosition());
         telemetry.addData("sm:",sm);

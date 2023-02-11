@@ -19,7 +19,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class AtunonomA2 extends LinearOpMode{
+public class AtunonomAlbastruSpate extends LinearOpMode{
     private OpenCvWebcam webcam;
     int currentmotorBL;
     int currentmotorBR;
@@ -86,25 +86,25 @@ public class AtunonomA2 extends LinearOpMode{
         alecsticulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         alecsticulator2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ecstensor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
-            int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-            webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-            webcam.setPipeline(pipeline);
+        telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        webcam.setPipeline(pipeline);
 
-            webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-                @Override
-                public void onOpened() {
-                    webcam.startStreaming(Webcam_w, Webcam_h, OpenCvCameraRotation.UPRIGHT);
-                }
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                webcam.startStreaming(Webcam_w, Webcam_h, OpenCvCameraRotation.UPRIGHT);
+            }
 
-                @Override
-                public void onError(int errorCode) {
+            @Override
+            public void onError(int errorCode) {
 
-                }
-            });
-            telemetry.addLine("Waiting for start");
-            telemetry.update();
-            FtcDashboard.getInstance().startCameraStream(webcam, 60);
+            }
+        });
+        telemetry.addLine("Waiting for start");
+        telemetry.update();
+        FtcDashboard.getInstance().startCameraStream(webcam, 60);
         while (!isStarted() && !isStopRequested()) {
             try {
                 width = pipeline.getRect().width;
@@ -143,34 +143,64 @@ public class AtunonomA2 extends LinearOpMode{
             Autonom.start();
         }
         while(!isStopRequested()){
-
+            telemetry.addData("turela:",turela.getCurrentPosition());
+            telemetry.update();
         }
     }
     public Thread Autonom = new Thread(new Runnable(){
         @Override
         public void run() {
-            /*crow.setPosition(0.2);
-            kdf(400);
-            target(-770,1,alecsticulator1);
+            supramax.setPosition(0.5);
             kdf(600);
-            target(-520,0.5,ecstensor);
+            crow.setPosition(0.2);
+            kdf(400);
+            Translatare(30,0,0.5);
+            kdf(200);
+            Translatare(0,-173,0.5);
+            kdf(200);
+            target(-1000,0.5,alecsticulator1);
+            kdf(200);
+            supramax.setPosition(0);
+            Rotire(-70,0.5);
+            kdf(200);
+            target(-370,0.5,ecstensor);
+            kdf(200);
+            crow.setPosition(0.7);
+            kdf(100);
+            target(-550,0.5,turela);
+            kdf(200);
+            target(-300,0.5,alecsticulator1);
+            kdf(100);
+            target(-400,0.5,ecstensor);
+            /*
+            target(-840,0.5,alecsticulator1);
+            kdf(600);
+            target(275,0.5,turela);
             kdf(1000);
-            supramax.setPosition(0.2);
-            kdf(1000);
+            supramax.setPosition(0.1);
+            kdf(200);
+            Translatare(0,-10,0.4);
+            kdf(200);
+            target(-450,0.5,ecstensor);
+            kdf(400);
             crow.setPosition(0.7);
             kdf(500);
             target(-20,0.5,ecstensor);
-            kdf(600)*/
-            Translatare(-130,0,0.4);
+            kdf(600);
+            target(-1400,0.5,alecsticulator1);
+            Translatare(135,0,0.4);
             kdf(300);
-            Translatare(0,-260,0.4);
-            if(varrez == "Mijloc"&&!isStopRequested()) {
-                Translatare(130,0,0.4);
+            Translatare(0,-243,0.4);
+            kdf(200);
+            target(-1250,0.5,turela);
+            kdf(200);
+            Translatare(-195,0,0.4);*/
+            /*if(varrez == "Mijloc"&&!isStopRequested()) {
+                Translatare(-130,0,0.4);
             }
-
-            if(varrez == "Dreapta"&&!isStopRequested()) {
-                Translatare(260,0,0.4);
-            }
+            if(varrez == "Stanga"&&!isStopRequested()) {
+                Translatare(-260,0,0.4);
+            }*/
         }
     });
     public void Translatare(int deltaX, int deltaY, double speed)
