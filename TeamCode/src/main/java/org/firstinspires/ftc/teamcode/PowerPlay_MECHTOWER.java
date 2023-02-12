@@ -19,10 +19,10 @@ public class PowerPlay_MECHTOWER extends OpMode {
     private DcMotorEx motorBR;
     private DcMotorEx motorFL;
     private DcMotorEx motorFR;
-    private DcMotorEx ecstensor, turela;
-    private DcMotorEx alecsticulator1,alecsticulator2;
+    private DcMotorEx extensor, turela;
+    private DcMotorEx articulator1,articulator2;
     private Servo claw;
-    private Servo supramax;
+    private Servo clawArticulation;
     double sm = 1, ms = 1.5,ms2 = 1;
     private BNO055IMU imu;
     double y, x, rx, rx2;
@@ -69,17 +69,17 @@ public class PowerPlay_MECHTOWER extends OpMode {
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
     public void mamplicitisit(int poz1, double pow1){
-        alecsticulator1.setTargetPosition(poz1);
-        alecsticulator2.setTargetPosition(-poz1);
-        alecsticulator1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        alecsticulator2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        alecsticulator1.setPower(pow1);
-        alecsticulator2.setPower(pow1);
-        while (alecsticulator1.isBusy()||alecsticulator2.isBusy());
-        alecsticulator1.setPower(0);
-        alecsticulator2.setPower(0);
-        alecsticulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        alecsticulator2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        articulator1.setTargetPosition(poz1);
+        articulator2.setTargetPosition(-poz1);
+        articulator1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        articulator2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        articulator1.setPower(pow1);
+        articulator2.setPower(pow1);
+        while (articulator1.isBusy()||articulator2.isBusy());
+        articulator1.setPower(0);
+        articulator2.setPower(0);
+        articulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        articulator2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -88,11 +88,11 @@ public class PowerPlay_MECHTOWER extends OpMode {
         motorFL = hardwareMap.get(DcMotorEx.class, "motorfs"); // Motor Front-Left
         motorFR = hardwareMap.get(DcMotorEx.class, "motorfd"); // Motor Front-Right
         turela      = hardwareMap.get(DcMotorEx.class, "motorTower");
-        alecsticulator1 = hardwareMap.get(DcMotorEx.class,"motorArm1");
-        alecsticulator2 = hardwareMap.get(DcMotorEx.class, "motorArm2");
-        ecstensor = hardwareMap.get(DcMotorEx.class, "motorExtension");
+        articulator1 = hardwareMap.get(DcMotorEx.class,"motorArm1");
+        articulator2 = hardwareMap.get(DcMotorEx.class, "motorArm2");
+        extensor = hardwareMap.get(DcMotorEx.class, "motorExtension");
         claw      = hardwareMap.servo.get("servoRelease");
-        supramax = hardwareMap.servo.get("servoRotate");
+        clawArticulation = hardwareMap.servo.get("servoRotate");
 
         touchL = hardwareMap.get(DigitalChannel.class, "touchL"); // limitator de rotație stânga
         touchR = hardwareMap.get(DigitalChannel.class, "touchR"); // limitator de rotație dreapta
@@ -111,9 +111,9 @@ public class PowerPlay_MECHTOWER extends OpMode {
         motorFR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         turela.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        alecsticulator1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        alecsticulator2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ecstensor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        articulator1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        articulator2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        extensor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         motorFR.setMode(DcMotor.RunMode.RESET_ENCODERS);
         motorFL.setMode(DcMotor.RunMode.RESET_ENCODERS);
@@ -121,17 +121,17 @@ public class PowerPlay_MECHTOWER extends OpMode {
         motorBL.setMode(DcMotor.RunMode.RESET_ENCODERS);
 
         turela.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        alecsticulator1.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        alecsticulator2.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        ecstensor.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        articulator1.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        articulator2.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        extensor.setMode(DcMotor.RunMode.RESET_ENCODERS);
         //motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //alecsticulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //alecsticulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //ecstensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //articulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //articulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //extensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -139,18 +139,19 @@ public class PowerPlay_MECHTOWER extends OpMode {
         motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        alecsticulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        alecsticulator2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ecstensor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        articulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        articulator2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        extensor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         telemetry.addData("Status", "Initialized");
         telemetry.addData("Resseting", "Encoders");
         telemetry.update();
+
     }
     public void start(){
         Chassis.start();
         Systems.start();
-        //pdi.start();
+        pdi.start();
     }
     public void stop(){stop = true;}
     private final Thread Chassis = new Thread(new Runnable() {
@@ -230,9 +231,9 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 rblast = gamepad1.right_bumper;
                 if(gamepad1.a){
                     turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    alecsticulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    alecsticulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    ecstensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    articulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    articulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    extensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
                 if(sm==3){
                     POWER(pmotorFR/1.5, pmotorFL/1.5, pmotorBR/1.5, pmotorBL/1.5);
@@ -250,8 +251,8 @@ public class PowerPlay_MECHTOWER extends OpMode {
         @Override
         public void run() {
             while (!stop) {
-                //if(ecstensor.getCurrentPosition() < 300) {
-                ecstensor.setPower(gamepad2.left_stick_y/ms2);
+                //if(extensor.getCurrentPosition() < 300) {
+                extensor.setPower(gamepad2.left_stick_y/ms2);
                 if (gamepad2.x != alast) {
                     acn++;
                 }
@@ -281,9 +282,9 @@ public class PowerPlay_MECHTOWER extends OpMode {
                     target(1500,0.4,turela);
                 }
                 ylast = gamepad2.y;
-                alecsticulator1.setPower(gamepad2.right_stick_y);
-                alecsticulator2.setPower(-gamepad2.right_stick_y);
-                if(touchL.getState() && touchR.getState()) {
+                articulator1.setPower(gamepad2.right_stick_y);
+                articulator2.setPower(-gamepad2.right_stick_y);
+                /*if(touchL.getState() && touchR.getState()) {
                     turela.setPower((gamepad2.left_trigger/ms - gamepad2.right_trigger/ms)/1.4);
                 }
                 else if(!touchR.getState() && !inAutomatizare) {
@@ -293,7 +294,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 else if(!touchL.getState() && !inAutomatizare){
                     turela.setPower(0.06);
                     inAutomatizare = true;
-                }
+                }*/
                 inAutomatizare = false;
                 if(gamepad2.left_bumper && colagen <= 1){
                     colagen+=0.005;
@@ -301,7 +302,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 if(gamepad2.right_bumper && colagen >= 0){
                     colagen-=0.005;
                 }
-                supramax.setPosition(1-colagen);
+                clawArticulation.setPosition(1-colagen);
                 if(gamepad2.a /*&& colagen >= 0.01*/) {
                     //colagen -= 0.005;
                     claw.setPosition(0.2);
@@ -311,14 +312,14 @@ public class PowerPlay_MECHTOWER extends OpMode {
                     claw.setPosition(0.7);
                 }
 
-                //supramax.setPosition(1-colagen);
+                //clawArticulation.setPosition(1-colagen);
 
                 if(gamepad2.dpad_up)
                 {
                     inAutomatizare = true;
-                    target(-732, 0.7,alecsticulator1);
+                    target(-732, 0.7,articulator1);
                     target(1200,0.7,turela);
-                    target(-110,0.7,ecstensor);
+                    target(-110,0.7,extensor);
                     inAutomatizare = false;
                 }
 
@@ -326,23 +327,23 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 if(gamepad2.dpad_down)
                 {
                     inAutomatizare = true;
-                    target(0,0.7,ecstensor);
+                    target(0,0.7,extensor);
                     while(touchL.getState()){
                         turela.setPower(-0.7);
                     }
-                    target(0, 0.7,alecsticulator1);
+                    target(0, 0.7,articulator1);
                     turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     inAutomatizare = false;
                 }
 
                 /*if(gamepad2.dpad_up){
-                    alecsticulator1.setTargetPosition(62);
-                    alecsticulator2.setTargetPosition(0);
-                    alecsticulator1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    alecsticulator2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    alecsticulator1.setPower(0.4);
-                    alecsticulator2.setPower(-0.2);
+                    articulator1.setTargetPosition(62);
+                    articulator2.setTargetPosition(0);
+                    articulator1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    articulator2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    articulator1.setPower(0.4);
+                    articulator2.setPower(-0.2);
 
 
                 }*/
@@ -350,9 +351,9 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 boolean isOver=true;
                /* if(gamepad2.y && isOver==true){
                     isOver = false;
-                    target(-10,1,ecstensor);
-                    target(-1060,1,alecsticulator1);
-                    target(-250,1,ecstensor);
+                    target(-10,1,extensor);
+                    target(-1060,1,articulator1);
+                    target(-250,1,extensor);
                 }*/
                 isOver = true;
             }
@@ -361,13 +362,14 @@ public class PowerPlay_MECHTOWER extends OpMode {
     private final Thread pdi = new Thread(new Runnable() {
         @Override
         public void run() {
-            pid.setPID(constants.kp, constants.ki, constants.kd);
-
+            pid.enable();
             while (!stop) {
-                if (!turela.isBusy()) {
+                pid.setPID(constants.kp, constants.ki, constants.kd);
+                if (gamepad2.left_trigger != 0 || gamepad2.right_trigger != 0) {
                     turela.setPower(gamepad2.left_trigger / 2 - gamepad2.right_trigger / 2);
                     setSetpoint = true;
-                } else {
+                }
+                else {
                     if (setSetpoint) {
                         pid.setSetpoint(turela.getCurrentPosition());
                         setSetpoint = false;
@@ -383,12 +385,12 @@ public class PowerPlay_MECHTOWER extends OpMode {
         telemetry.addData("motorBR:", motorBR.getCurrentPosition());
         telemetry.addData("motorFL:", motorFL.getCurrentPosition());
         telemetry.addData("motorFR:", motorFR.getCurrentPosition());
-        telemetry.addData("ecstensor:", ecstensor.getCurrentPosition());
-        telemetry.addData("alecsticulator1:", alecsticulator1.getCurrentPosition());
-        telemetry.addData("alecsticulator2:", alecsticulator2.getCurrentPosition());
-        telemetry.addData("alecsticulator1:", alecsticulator1.getPower());
-        telemetry.addData("alecsticulator1:", alecsticulator2.getPower());
-        telemetry.addData("supramax:", supramax.getPosition());
+        telemetry.addData("extensor:", extensor.getCurrentPosition());
+        telemetry.addData("articulator1:", articulator1.getCurrentPosition());
+        telemetry.addData("articulator2:", articulator2.getCurrentPosition());
+        telemetry.addData("articulator1:", articulator1.getPower());
+        telemetry.addData("articulator1:", articulator2.getPower());
+        telemetry.addData("clawArticulation:", clawArticulation.getPosition());
         telemetry.addData("colagen:", colagen);
         telemetry.addData("claw:", claw.getPosition());
         telemetry.addData("pozitie turela", turela.getCurrentPosition());
@@ -403,6 +405,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
         telemetry.addData("DError",pid.getDError()*pid.getD());
         telemetry.addData("IError",pid.getISum()*pid.getI());
         telemetry.addData("Error",pid.getError());
+        telemetry.addData("putere turela", turela.getPower());
         telemetry.update();
     }
 }

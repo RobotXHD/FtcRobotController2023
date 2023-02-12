@@ -39,8 +39,11 @@ public class AtunonomAlbastruSpate extends LinearOpMode{
     private Servo supramax;
     DigitalChannel touchL,touchR;
     String varrez = "Mijloc";
+    PidControllerAdevarat pid = new PidControllerAdevarat(0.0,0.0,0.0);
     @Override
     public void runOpMode() throws InterruptedException {
+        pid.enable();
+        pid.setPID(constants.kp, constants.ki, constants.kd);
         motorBL = hardwareMap.get(DcMotorEx.class, "motorss"); // Motor Back-Left
         motorBR = hardwareMap.get(DcMotorEx.class, "motorsd"); // Motor Back-Right
         motorFL = hardwareMap.get(DcMotorEx.class, "motorfs"); // Motor Front-Left
@@ -154,24 +157,61 @@ public class AtunonomAlbastruSpate extends LinearOpMode{
             kdf(600);
             crow.setPosition(0.2);
             kdf(400);
+            supramax.setPosition(0.8);
+            kdf(200);
             Translatare(30,0,0.5);
             kdf(200);
             Translatare(0,-173,0.5);
             kdf(200);
-            target(-1000,0.5,alecsticulator1);
+            target(-1000,0.75,alecsticulator1);
+            kdf(200);
+            Rotire(-60,0.5);
+            kdf(200);
+            target(-380,0.75,ecstensor);
             kdf(200);
             supramax.setPosition(0);
-            Rotire(-70,0.5);
-            kdf(200);
-            target(-370,0.5,ecstensor);
-            kdf(200);
+            kdf(900);
             crow.setPosition(0.7);
             kdf(100);
-            target(-550,0.5,turela);
+            target(-540,0.5,turela);
             kdf(200);
-            target(-300,0.5,alecsticulator1);
+            supramax.setPosition(0.3);
+            kdf(900);
+            target(-550,0.5,alecsticulator1);
             kdf(100);
-            target(-400,0.5,ecstensor);
+            target(-410,0.5,ecstensor);
+            kdf(200);
+            crow.setPosition(0.2);
+            kdf(100);
+            target(-1000,0.5,alecsticulator1);
+            kdf(200);
+            target(0,0.5,ecstensor);
+            kdf(200);
+            target(0,0.5,turela);
+            kdf(100);
+            target(-365,0.5,ecstensor);
+            kdf(100);
+            crow.setPosition(0.7);
+            kdf(100);
+            target(-540,0.5,turela);
+            kdf(200);
+            supramax.setPosition(0.3);
+            kdf(900);
+            target(-540,0.5,alecsticulator1);
+            kdf(100);
+            target(-410,0.5,ecstensor);
+            kdf(200);
+            crow.setPosition(0.2);
+            kdf(100);
+            target(-1000,0.5,alecsticulator1);
+            kdf(200);
+            target(0,0.5,ecstensor);
+            kdf(200);
+            target(0,0.5,turela);
+            kdf(100);
+            target(-365,0.5,ecstensor);
+            kdf(100);
+            crow.setPosition(0.7);
             /*
             target(-840,0.5,alecsticulator1);
             kdf(600);
@@ -201,6 +241,26 @@ public class AtunonomAlbastruSpate extends LinearOpMode{
             if(varrez == "Stanga"&&!isStopRequested()) {
                 Translatare(-260,0,0.4);
             }*/
+        }
+    });
+    private final Thread pdi = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (opModeIsActive()) {
+                boolean setSetpoint = false;
+                double pidResult;
+                if (!turela.isBusy()) {
+                    setSetpoint = true;
+                }
+                else {
+                    if (setSetpoint) {
+                        pid.setSetpoint(turela.getCurrentPosition());
+                        setSetpoint = false;
+                    }
+                    pidResult = pid.performPID(turela.getCurrentPosition());
+                    turela.setPower(pidResult);
+                }
+            }
         }
     });
     public void Translatare(int deltaX, int deltaY, double speed)
@@ -326,18 +386,39 @@ public class AtunonomAlbastruSpate extends LinearOpMode{
         motor.setPower(pow);
         while (motor.isBusy());
         motor.setPower(0);
+        /*pid.setSetpoint(motor.getCurrentPosition());
+        pid_result = pid.performPID(motor.getCurrentPosition());
+        motor.setPower(pid_result);*/
         motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-    public void targetime(int poz, double pow, DcMotorEx motor,int t){
-        double lastTime2;
-        lastTime2 = System.currentTimeMillis();
-        while(lastTime2 + t > System.currentTimeMillis()) {
-            motor.setTargetPosition(poz);
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motor.setPower(pow);
-            while (motor.isBusy());
-            motor.setPower(0);
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    public void targeturela(int poz, double pow){
+        double pid_result;
+        turela.setTargetPosition(poz);
+        turela.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        turela.setPower(pow);
+        while (turela.isBusy());
+        turela.setPower(0);
+        turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        while (turela.getCurrentPosition() < poz+1 && turela.getCurrentPosition() > poz-1){
+            pid.setSetpoint(poz);
+            pid_result = pid.performPID(poz);
+            turela.setPower(pid_result);
+        }
+        pid.setSetpoint(poz);
+        pid_result = pid.performPID(poz);
+        turela.setPower(pid_result);
+        while (turela.getCurrentPosition() < poz+1 && turela.getCurrentPosition() > poz-1){
+            pid.setSetpoint(poz);
+            pid_result = pid.performPID(poz);
+            turela.setPower(pid_result);
+        }
+        pid.setSetpoint(poz);
+        pid_result = pid.performPID(poz);
+        turela.setPower(pid_result);
+        while (turela.getCurrentPosition() < poz+1 && turela.getCurrentPosition() > poz-1){
+            pid.setSetpoint(poz);
+            pid_result = pid.performPID(poz);
+            turela.setPower(pid_result);
         }
     }
     public void kdf(int t){
