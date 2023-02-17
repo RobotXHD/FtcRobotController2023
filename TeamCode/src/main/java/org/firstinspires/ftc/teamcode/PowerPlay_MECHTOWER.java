@@ -10,7 +10,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 @TeleOp
@@ -47,13 +49,13 @@ public class PowerPlay_MECHTOWER extends OpMode {
     private long pidTime = 0;
     public double difference,medie;
     public double medii[] = new double[10];
-    public boolean rotating = false,inAutomatizare = false;
+    public boolean rotating = false,inAutomatizare = true;
     public double realAngle, targetAngle;
     private double forward, right, clockwise;
     double pidResult;
     PidControllerAdevarat pid = new PidControllerAdevarat(0.0,0.0,0.0);
     boolean setSetPoint=false;
-    DigitalChannel touchL,touchR;
+    TouchSensor touchL,touchR;
     void POWER(double df1, double sf1, double ds1, double ss1){
         motorFR.setPower(df1);
         motorBL.setPower(ss1);
@@ -94,8 +96,8 @@ public class PowerPlay_MECHTOWER extends OpMode {
         claw      = hardwareMap.servo.get("servoRelease");
         clawArticulation = hardwareMap.servo.get("servoRotate");
 
-        touchL = hardwareMap.get(DigitalChannel.class, "touchL"); // limitator de rotație stânga
-        touchR = hardwareMap.get(DigitalChannel.class, "touchR"); // limitator de rotație dreapta
+        touchL = hardwareMap.get(TouchSensor.class, "touchL"); // limitator de rotație stânga
+        touchR = hardwareMap.get(TouchSensor.class, "touchR"); // limitator de rotație dreapta
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -124,14 +126,16 @@ public class PowerPlay_MECHTOWER extends OpMode {
         articulator1.setMode(DcMotor.RunMode.RESET_ENCODERS);
         articulator2.setMode(DcMotor.RunMode.RESET_ENCODERS);
         extensor.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        //motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        //turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //articulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //articulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //extensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        articulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        articulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -151,17 +155,17 @@ public class PowerPlay_MECHTOWER extends OpMode {
     public void start(){
         Chassis.start();
         Systems.start();
-        pdi.start();
+        //pdi.start();
     }
     public void stop(){stop = true;}
     private final Thread Chassis = new Thread(new Runnable() {
         @Override
         public void run(){
             while(!stop) {
-                if(gamepad2.left_bumper) {
-                    ok1 = false;
-                    ok1 = true;
+                if(gamepad1.dpad_up){
+                    inAutomatizare = false;
                 }
+                turela.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(constants.kp,constants.ki,constants.kd,constants.kf));
                 y  = gamepad1.left_stick_y;
                 x  = gamepad1.left_stick_x;
                 rx = gamepad1.right_stick_x;
@@ -227,19 +231,19 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 else if(rbcn==0 && lbcn == 0){
                     sm=1;
                 }
-                lblast = gamepad1.left_bumper;
                 rblast = gamepad1.right_bumper;
-                if(gamepad1.a){
+                lblast = gamepad1.left_bumper;
+                if(gamepad1.x){
                     turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     articulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     articulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     extensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 }
                 if(sm==3){
-                    POWER(pmotorFR/1.5, pmotorFL/1.5, pmotorBR/1.5, pmotorBL/1.5);
+                    POWER(pmotorFR * 1.2, pmotorFL * 1.2, pmotorBR * 1.2, pmotorBL * 1.2);
                 }
                 else if(sm==5){
-                    POWER(pmotorFR / 3, pmotorFL / 3, pmotorBR / 3, pmotorBL / 3);
+                    POWER(pmotorFR / 2, pmotorFL / 2, pmotorBR / 2, pmotorBL / 2);
                 }
                 else{
                     POWER(pmotorFR * 2, pmotorFL * 2, pmotorBR * 2, pmotorBL * 2);
@@ -252,7 +256,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
         public void run() {
             while (!stop) {
                 //if(extensor.getCurrentPosition() < 300) {
-                extensor.setPower(gamepad2.left_stick_y/ms2);
+                extensor.setPower(gamepad2.left_stick_y/1.25/ms2);
                 if (gamepad2.x != alast) {
                     acn++;
                 }
@@ -282,25 +286,25 @@ public class PowerPlay_MECHTOWER extends OpMode {
                     target(1500,0.4,turela);
                 }
                 ylast = gamepad2.y;
-                articulator1.setPower(gamepad2.right_stick_y);
-                articulator2.setPower(-gamepad2.right_stick_y);
-                /*if(touchL.getState() && touchR.getState()) {
+                articulator1.setPower(gamepad2.right_stick_y/1.5);
+                articulator2.setPower(-gamepad2.right_stick_y/1.5);
+                if(!touchL.isPressed() && !touchR.isPressed()) {
                     turela.setPower((gamepad2.left_trigger/ms - gamepad2.right_trigger/ms)/1.4);
                 }
-                else if(!touchR.getState() && !inAutomatizare) {
+                else if(touchR.isPressed() && !inAutomatizare) {
                     turela.setPower(-0.06);
                     inAutomatizare = true;
                 }
-                else if(!touchL.getState() && !inAutomatizare){
+                else if(touchL.isPressed() && !inAutomatizare){
                     turela.setPower(0.06);
                     inAutomatizare = true;
-                }*/
+                }
                 inAutomatizare = false;
                 if(gamepad2.left_bumper && colagen <= 1){
-                    colagen+=0.005;
+                    colagen+=0.008;
                 }
                 if(gamepad2.right_bumper && colagen >= 0){
-                    colagen-=0.005;
+                    colagen-=0.008;
                 }
                 clawArticulation.setPosition(1-colagen);
                 if(gamepad2.a /*&& colagen >= 0.01*/) {
@@ -316,27 +320,44 @@ public class PowerPlay_MECHTOWER extends OpMode {
 
                 if(gamepad2.dpad_up)
                 {
+                    //inAutomatizare = true;
+                    target(-1200, 0.7,articulator1);
+                    target(690,0.7,turela);
+                    target(-280,0.7,extensor);
+                    colagen = 0.7;
+                    clawArticulation.setPosition(1-colagen);
                     inAutomatizare = true;
-                    target(-732, 0.7,articulator1);
-                    target(1200,0.7,turela);
-                    target(-110,0.7,extensor);
-                    inAutomatizare = false;
+                    //inAutomatizare = false;
                 }
 
 
                 if(gamepad2.dpad_down)
                 {
-                    inAutomatizare = true;
                     target(0,0.7,extensor);
-                    while(touchL.getState()){
-                        turela.setPower(-0.7);
-                    }
-                    target(0, 0.7,articulator1);
-                    turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    inAutomatizare = false;
+                    target(0,0.7,turela);
+                    colagen = 0;
+                    clawArticulation.setPosition(1-colagen);
+                    target(-50, 0.7,articulator1);
+                    inAutomatizare = true;
                 }
 
+                if(gamepad2.dpad_left)
+                {
+                    target(-1046,0.7,articulator1);
+                    target(690,0.7,turela);
+                    colagen = 0.6;
+                    clawArticulation.setPosition(1-colagen);
+                    inAutomatizare=true;
+                }
+
+                if(gamepad2.dpad_right)
+                {
+                    target(-1046,0.7,articulator1);
+                    target(-690,0.7,turela);
+                    colagen = 0.6;
+                    clawArticulation.setPosition(1-colagen);
+                    inAutomatizare = true;
+                }
                 /*if(gamepad2.dpad_up){
                     articulator1.setTargetPosition(62);
                     articulator2.setTargetPosition(0);
@@ -398,8 +419,8 @@ public class PowerPlay_MECHTOWER extends OpMode {
         telemetry.addData("ms:",ms);
         telemetry.addData("rbcn:",rbcn);
         telemetry.addData("lbcn:",lbcn);
-        telemetry.addData("STARE SENZOR stg",touchL.getState());
-        telemetry.addData("STARE SENZOR stg",touchR.getState());
+        telemetry.addData("STARE SENZOR stg",touchL.isPressed());
+        telemetry.addData("STARE SENZOR stg",touchR.isPressed());
         telemetry.addData("getSetpoint",pid.getSetpoint());
         telemetry.addData("PError",pid.getError()*pid.getP());
         telemetry.addData("DError",pid.getDError()*pid.getD());

@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -19,102 +20,30 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 @Autonomous
-public class AtunonomRosuSpate extends LinearOpMode{
-    private OpenCvWebcam webcam;
-    int currentmotorBL;
-    int currentmotorBR;
-    int currentmotorFL;
-    int currentmotorFR;
-    static final double COUNTSPERR = 383.6;
-    static final double GEARREDUCTION = 1;
-    static final double DIAMROT = 9.6;
-    static final double COUNTS_PER_CM = (COUNTSPERR*GEARREDUCTION) / (DIAMROT*3.1415);
+public class AtunonomRosuSpate extends LinearOpMode {
+    boolean ipd = true;
     private double width, height;
-    public double lastTime;
-    private PachetelNouOpenCV pipeline = new PachetelNouOpenCV();
-    private DcMotorEx motorFR, motorFL, motorBR, motorBL;
-    private DcMotorEx ecstensor,turela;
-    private DcMotorEx alecsticulator1,alecsticulator2;
-    private Servo crow;
-    private Servo supramax;
-    DigitalChannel touchL,touchR;
-    String varrez = "Mijloc";
+    private String varrez = "Mijloc";
+
+    private HardwareRobotTurela f = new HardwareRobotTurela();
+
     @Override
     public void runOpMode() throws InterruptedException {
-        motorBL = hardwareMap.get(DcMotorEx.class, "motorss"); // Motor Back-Left
-        motorBR = hardwareMap.get(DcMotorEx.class, "motorsd"); // Motor Back-Right
-        motorFL = hardwareMap.get(DcMotorEx.class, "motorfs"); // Motor Front-Left
-        motorFR = hardwareMap.get(DcMotorEx.class, "motorfd"); // Motor Front-Right
+        f.init(hardwareMap);
 
-        turela      = hardwareMap.get(DcMotorEx.class, "motorTower");
-        alecsticulator1 = hardwareMap.get(DcMotorEx.class,"motorArm1");
-        alecsticulator2 = hardwareMap.get(DcMotorEx.class, "motorArm2");
-        ecstensor = hardwareMap.get(DcMotorEx.class, "motorExtension");
-
-        crow      = hardwareMap.servo.get("servoRelease");
-        supramax = hardwareMap.servo.get("servoRotate");
-
-        touchL = hardwareMap.get(DigitalChannel.class, "touchL");
-        touchR = hardwareMap.get(DigitalChannel.class, "touchR");
-
-        motorBL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorBR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorFR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        turela.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        alecsticulator1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        alecsticulator2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ecstensor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        alecsticulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        alecsticulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        ecstensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        alecsticulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        alecsticulator2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ecstensor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
-            int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-            webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-            webcam.setPipeline(pipeline);
-
-            webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-                @Override
-                public void onOpened() {
-                    webcam.startStreaming(Webcam_w, Webcam_h, OpenCvCameraRotation.UPRIGHT);
-                }
-
-                @Override
-                public void onError(int errorCode) {
-
-                }
-            });
-            telemetry.addLine("Waiting for start");
-            telemetry.update();
-            FtcDashboard.getInstance().startCameraStream(webcam, 60);
+        telemetry.addLine("Waiting for start");
+        telemetry.update();
+        FtcDashboard.getInstance().startCameraStream(f.webcam, 60);
         while (!isStarted() && !isStopRequested()) {
             try {
-                width = pipeline.getRect().width;
-                height = pipeline.getRect().height;
-                telemetry.addData("Frame Count", webcam.getFrameCount());
-                telemetry.addData("FPS", String.format("%.2f", webcam.getFps()));
-                telemetry.addData("Total frame time ms", webcam.getTotalFrameTimeMs());
-                telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
-                telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
-                telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
+                width = f.pipeline.getRect().width;
+                height = f.pipeline.getRect().height;
+                telemetry.addData("Frame Count", f.webcam.getFrameCount());
+                telemetry.addData("FPS", String.format("%.2f", f.webcam.getFps()));
+                telemetry.addData("Total frame time ms", f.webcam.getTotalFrameTimeMs());
+                telemetry.addData("Pipeline time ms", f.webcam.getPipelineTimeMs());
+                telemetry.addData("Overhead time ms", f.webcam.getOverheadTimeMs());
+                telemetry.addData("Theoretical max FPS", f.webcam.getCurrentPipelineMaxFps());
                 telemetry.addData("Rectangle Width:", width);
                 telemetry.addData("Rectangle Height:", height);
                 telemetry.addData("Rectangle H/W:", height / width);
@@ -130,196 +59,67 @@ public class AtunonomRosuSpate extends LinearOpMode{
                 }
                 telemetry.addData("caz", varrez);
                 telemetry.update();
-            }
-            catch (Exception E){
+            } catch (Exception E) {
                 height = 1;
                 width = 1000;
                 varrez = "Dreapta";
                 telemetry.addData("Webcam Error:", "Please Restart");
             }
-            telemetry.addData("caz",varrez);
+            telemetry.addData("caz", varrez);
         }
-        if(!isStopRequested()) {
+        if (!isStopRequested()) {
+            pdi.start();
             Autonom.start();
         }
-        while(!isStopRequested()){
-
+        while (!isStopRequested()) {
+            telemetry.addData("turela:", f.turela.getCurrentPosition());
+            telemetry.addData("ecstensor:", f.ecstensor.getCurrentPosition());
+            telemetry.addData("alecsticulator:", f.alecsticulator1.getCurrentPosition());
+            telemetry.update();
         }
     }
-    public Thread Autonom = new Thread(new Runnable(){
-        @Override
-        public void run() {
-            supramax.setPosition(0);
-            kdf(600);
-            crow.setPosition(0.2);
-            kdf(400);
-            target(-780,0.5,alecsticulator1);
-            kdf(600);
-            target(-150,0.5,turela);
-            kdf(1000);
-            supramax.setPosition(0.1);
-            kdf(200);
-            Translatare(-15,-17,0.4);
-            target(-440,0.5,ecstensor);
-            kdf(1000);
-            crow.setPosition(0.7);
-            kdf(500);
-            target(-20,0.5,ecstensor);
-            kdf(600);
-            target(-1400,0.5,alecsticulator1);
-            Translatare(-130,0,0.4);
-            kdf(300);
-            Translatare(0,-243,0.4);
-            if(varrez == "Mijloc"&&!isStopRequested()) {
-                Translatare(130,0,0.4);
-            }
 
-            if(varrez == "Dreapta"&&!isStopRequested()) {
-                Translatare(260,0,0.4);
-            }
+    public Thread Autonom = new Thread(() -> {
+        f.supramax.setPosition(0.5);
+        f.kdf(600);
+        f.crow.setPosition(0.2);
+        f.kdf(400);
+        f.supramax.setPosition(0.8);
+        f.kdf(200);
+        f.target2(-750, 0.5);
+        f.kdf(100);
+        f.targetime(-180, 0.1, f.turela,5000);
+        f.kdf(200);
+        f.targetime(-555, 0.5, f.ecstensor,1200);
+        f.kdf(200);
+        f.supramax.setPosition(0.4);
+        f.kdf(900);
+        f.crow.setPosition(0.7);
+        f.kdf(100);
+        f.targetime(0,0.5,f.ecstensor,1200);
+        f.kdf(200);
+        f.supramax.setPosition(1);
+        f.targetime(-1400,0.5, f.alecsticulator1,1200);
+        f.kdf(100);
+        f.TranslatareTimp(-30,0,0.5, 2000);
+        f.kdf(200);
+        f.TranslatareTimp(0, -130, 0.5, 2000);
+        if(varrez == "Stanga"){
+            f.TranslatareTimp(-130,0,0.5, 2000);
+        }
+        else if(varrez == "Dreapta"){
+            f.TranslatareTimp(130,0,0.5, 2000);
         }
     });
-    public void Translatare(int deltaX, int deltaY, double speed)
-    {
-        boolean Done = false;
-        int errorpos;
-        int Maxerror = 20;
-        int targetBL, targetBR, targetFL, targetFR;
-        double cpcm = COUNTS_PER_CM * 0.707 ;
-
-        currentmotorBL = motorBL.getCurrentPosition();
-        currentmotorBR = motorBR.getCurrentPosition();
-        currentmotorFL = motorFL.getCurrentPosition();
-        currentmotorFR = motorFR.getCurrentPosition();
-
-        targetBR = currentmotorBR + (int) (( deltaY + deltaX) * cpcm);
-        targetBL = currentmotorBL + (int) ((-deltaY + deltaX) * cpcm);
-        targetFR = currentmotorFR + (int) (( deltaY - deltaX) * cpcm);
-        targetFL = currentmotorFL + (int) ((-deltaY - deltaX) * cpcm);
-
-
-         /*
-         motorBR.setTargetPosition(currentmotorBR + (int) (( deltaY + deltaX) * cpcm));
-         motorBL.setTargetPosition(currentmotorBL + (int) ((-deltaY + deltaX) * cpcm));
-         motorFR.setTargetPosition(currentmotorFR + (int) (( deltaY - deltaX) * cpcm));
-         motorFL.setTargetPosition(currentmotorFL + (int) ((-deltaY - deltaX) * cpcm));
-         */
-        motorBL.setTargetPosition(targetBL);
-        motorBR.setTargetPosition(targetBR);
-        motorFL.setTargetPosition(targetFL);
-        motorFR.setTargetPosition(targetFR);
-
-        motorBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        motorBL.setPower(speed);
-        motorBR.setPower(speed);
-        motorFL.setPower(speed);
-        motorFR.setPower(speed);
-
-        Done = false;
-        while(!Done && opModeIsActive()){
-            Done = true;
-            errorpos = Math.abs(targetBL - motorBL.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-
-            errorpos = Math.abs(targetBR - motorBR.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-
-            errorpos = Math.abs(targetFL - motorFL.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-
-            errorpos = Math.abs(targetFR - motorFR.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
+    private final Thread pdi = new Thread(() -> {
+        while (opModeIsActive()) {
+            double pidResult;
+            f.turela.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(constants.kp,constants.ki,constants.kd,constants.kf));
+            /*if(ipd == true) {
+                pid.setSetpoint(poz2);
+                pidResult = pid.performPID(poz2);
+                turela.setPower(pidResult);
+            }*/
         }
-
-        //while(motorFR.isBusy() || motorFL.isBusy() || motorBR.isBusy() || motorBL.isBusy() && opModeIsActive());
-
-        motorBL.setPower(0);
-        motorBR.setPower(0);
-        motorFL.setPower(0);
-        motorFR.setPower(0);
-
-        motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-    public void Rotire (int deltaA, double speed)
-    {
-        boolean Done = false;
-        int errorpos ;
-        int Maxerror = 15;
-        int targetBL, targetBR, targetFL, targetFR;
-        double cpdeg = 17.5 * 3.141 / 180 * COUNTS_PER_CM;
-
-        currentmotorBL = motorBL.getCurrentPosition();
-        currentmotorBR = motorBR.getCurrentPosition();
-        currentmotorFL = motorFL.getCurrentPosition();
-        currentmotorFR = motorFR.getCurrentPosition();
-
-        targetBL = currentmotorBL + (int) (deltaA * cpdeg);
-        targetBR = currentmotorBR + (int) (deltaA * cpdeg);
-        targetFL = currentmotorFL + (int) (deltaA * cpdeg);
-        targetFR = currentmotorFR + (int) (deltaA * cpdeg);
-
-        motorBL.setTargetPosition(targetBL);
-        motorBR.setTargetPosition(targetBR);
-        motorFL.setTargetPosition(targetFL);
-        motorFR.setTargetPosition(targetFR);
-
-        motorBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        motorBL.setPower(speed);
-        motorBR.setPower(speed);
-        motorFL.setPower(speed);
-        motorFR.setPower(speed);
-
-        Done = false;
-        while(!Done && opModeIsActive()){
-            Done = true;
-            errorpos = Math.abs(targetBL - motorBL.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-
-            errorpos = Math.abs(targetBR - motorBR.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-
-            errorpos = Math.abs(targetFL - motorFL.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-
-            errorpos = Math.abs(targetFR - motorFR.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-        }
-    }
-    public void target(int poz, double pow, DcMotorEx motor){
-        motor.setTargetPosition(poz);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(pow);
-        while (motor.isBusy());
-        motor.setPower(0);
-        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-    public void targetime(int poz, double pow, DcMotorEx motor,int t){
-        double lastTime2;
-        lastTime2 = System.currentTimeMillis();
-        while(lastTime2 + t > System.currentTimeMillis()) {
-            motor.setTargetPosition(poz);
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            motor.setPower(pow);
-            while (motor.isBusy());
-            motor.setPower(0);
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
-    }
-    public void kdf(int t){
-        lastTime=System.currentTimeMillis();
-        while(lastTime + t > System.currentTimeMillis()){
-
-        }
-    }
+    });
 }
