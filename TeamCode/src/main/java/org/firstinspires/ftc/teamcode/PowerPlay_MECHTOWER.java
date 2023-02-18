@@ -112,7 +112,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
         motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorFR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        turela.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //(turela.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         articulator1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         articulator2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         extensor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -122,7 +122,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
         motorBR.setMode(DcMotor.RunMode.RESET_ENCODERS);
         motorBL.setMode(DcMotor.RunMode.RESET_ENCODERS);
 
-        turela.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        //turela.setMode(DcMotor.RunMode.RESET_ENCODERS);
         articulator1.setMode(DcMotor.RunMode.RESET_ENCODERS);
         articulator2.setMode(DcMotor.RunMode.RESET_ENCODERS);
         extensor.setMode(DcMotor.RunMode.RESET_ENCODERS);
@@ -132,7 +132,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
         motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         articulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         articulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         extensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -142,7 +142,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
         motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         articulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         articulator2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         extensor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -169,6 +169,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 y  = gamepad1.left_stick_y;
                 x  = gamepad1.left_stick_x;
                 rx = gamepad1.right_stick_x;
+                rx2 = gamepad2.right_stick_x / 7;
                 /*
                 pid.setPID(constants.pGyro,constants.iGyro,constants.dGyro);
                 if(clockwise != 0.0){
@@ -188,10 +189,10 @@ public class PowerPlay_MECHTOWER extends OpMode {
                         correction = 0.0;
                     }
                 }*/
-                pmotorFL = y + x + rx;
-                pmotorBL = y - x + rx;
-                pmotorBR = y + x - rx;
-                pmotorFR = y - x - rx;
+                pmotorFL = y + x + rx + rx2;
+                pmotorBL = -y - x + rx + rx2;
+                pmotorBR = -y + x - rx - rx2;
+                pmotorFR = y - x - rx - rx2;
 
                 max = abs(pmotorFL);
                 if (abs(pmotorFR) > max) {
@@ -288,7 +289,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 ylast = gamepad2.y;
                 articulator1.setPower(gamepad2.right_stick_y/1.5);
                 articulator2.setPower(-gamepad2.right_stick_y/1.5);
-                if(!touchL.isPressed() && !touchR.isPressed()) {
+                /*if(!touchL.isPressed() && !touchR.isPressed()) {
                     turela.setPower((gamepad2.left_trigger/ms - gamepad2.right_trigger/ms)/1.4);
                 }
                 else if(touchR.isPressed() && !inAutomatizare) {
@@ -298,13 +299,13 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 else if(touchL.isPressed() && !inAutomatizare){
                     turela.setPower(0.06);
                     inAutomatizare = true;
-                }
+                }*/
                 inAutomatizare = false;
                 if(gamepad2.left_bumper && colagen <= 1){
-                    colagen+=0.008;
+                    colagen+=0.006;
                 }
                 if(gamepad2.right_bumper && colagen >= 0){
-                    colagen-=0.008;
+                    colagen-=0.006;
                 }
                 clawArticulation.setPosition(1-colagen);
                 if(gamepad2.a /*&& colagen >= 0.01*/) {

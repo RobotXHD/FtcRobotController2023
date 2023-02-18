@@ -72,15 +72,18 @@ public class AtunonomRosuSpate extends LinearOpMode {
             Autonom.start();
         }
         while (!isStopRequested()) {
-            telemetry.addData("turela:", f.turela.getCurrentPosition());
-            telemetry.addData("ecstensor:", f.ecstensor.getCurrentPosition());
-            telemetry.addData("alecsticulator:", f.alecsticulator1.getCurrentPosition());
+            //telemetry.addData("turela:", f.turela.getCurrentPosition());
+            //telemetry.addData("ecstensor:", f.ecstensor.getCurrentPosition());
+            telemetry.addData("BRisBusy:", f.motorBR.isBusy());
+            telemetry.addData("BLisBusy:", f.motorBL.isBusy());
+            telemetry.addData("FRisBusy:", f.motorFR.isBusy());
+            telemetry.addData("FLisBusy:", f.motorFL.isBusy());
             telemetry.update();
         }
     }
 
     public Thread Autonom = new Thread(() -> {
-        f.supramax.setPosition(0.5);
+        /*f.supramax.setPosition(0.5);
         f.kdf(600);
         f.crow.setPosition(0.2);
         f.kdf(400);
@@ -100,15 +103,15 @@ public class AtunonomRosuSpate extends LinearOpMode {
         f.kdf(200);
         f.supramax.setPosition(1);
         f.targetime(-1400,0.5, f.alecsticulator1,1200);
-        f.kdf(100);
-        f.TranslatareTimp(-30,0,0.5, 2000);
+        f.kdf(100);*/
+        f.Translatare(-30,0,0.5);
         f.kdf(200);
-        f.TranslatareTimp(0, -130, 0.5, 2000);
+        f.Translatare(0, -130, 0.5);
         if(varrez == "Stanga"){
-            f.TranslatareTimp(-130,0,0.5, 2000);
+            f.Translatare(-130,0,0.5);
         }
         else if(varrez == "Dreapta"){
-            f.TranslatareTimp(130,0,0.5, 2000);
+            f.Translatare(130,0,0.5);
         }
     });
     private final Thread pdi = new Thread(() -> {

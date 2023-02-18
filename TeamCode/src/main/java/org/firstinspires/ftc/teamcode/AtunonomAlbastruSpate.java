@@ -77,16 +77,16 @@ public class AtunonomAlbastruSpate extends LinearOpMode {
             Autonom.start();
         }
         while (!isStopRequested()) {
-            telemetry.addData("turela:", f.turela.getCurrentPosition());
-            telemetry.addData("ecstensor:", f.ecstensor.getCurrentPosition());
-            telemetry.addData("alecsticulator:", f.alecsticulator1.getCurrentPosition());
+            //telemetry.addData("turela:", f.turela.getCurrentPosition());
+            //telemetry.addData("ecstensor:", f.ecstensor.getCurrentPosition());
+            //telemetry.addData("alecsticulator:", f.alecsticulator1.getCurrentPosition());
             telemetry.update();
         }
     }
 
     public Thread Autonom = new Thread(() -> {
         if(!isStopRequested()) {
-            f.supramax.setPosition(0.5);
+            /*f.supramax.setPosition(0.5);
             f.kdf(600);
             f.crow.setPosition(0.2);
             f.kdf(400);
@@ -106,7 +106,7 @@ public class AtunonomAlbastruSpate extends LinearOpMode {
             f.kdf(200);
             f.supramax.setPosition(1);
             f.targetime(-1600, 0.5, f.alecsticulator1, 1200);
-            f.kdf(100);
+            f.kdf(100);*/
             f.TranslatareTimp(30, 0, 0.5, 2000);
             f.kdf(200);
             f.TranslatareTimp(0, -130, 0.5, 2000);

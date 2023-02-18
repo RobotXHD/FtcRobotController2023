@@ -46,46 +46,46 @@ public class HardwareRobotTurela extends LinearOpMode {
         motorFL = hardwareMap.get(DcMotorEx.class, "motorfs"); // Motor Front-Left
         motorFR = hardwareMap.get(DcMotorEx.class, "motorfd"); // Motor Front-Right
 
-        turela = hardwareMap.get(DcMotorEx.class, "motorTower");
+        /*turela = hardwareMap.get(DcMotorEx.class, "motorTower");
         alecsticulator1 = hardwareMap.get(DcMotorEx.class, "motorArm1");
         alecsticulator2 = hardwareMap.get(DcMotorEx.class, "motorArm2");
         ecstensor = hardwareMap.get(DcMotorEx.class, "motorExtension");
 
         crow = hardwareMap.servo.get("servoRelease");
-        supramax = hardwareMap.servo.get("servoRotate");
+        supramax = hardwareMap.servo.get("servoRotate");*/
 
-        touchL = hardwareMap.get(TouchSensor.class, "touchL");
-        touchR = hardwareMap.get(TouchSensor.class, "touchR");
+        //touchL = hardwareMap.get(TouchSensor.class, "touchL");
+        //touchR = hardwareMap.get(TouchSensor.class, "touchR");
 
         motorBL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorFR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        turela.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        /*turela.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         alecsticulator1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         alecsticulator2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        ecstensor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ecstensor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);*/
 
         motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        /*turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         alecsticulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         alecsticulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        ecstensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        ecstensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);*/
 
         motorBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        /*turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         alecsticulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         alecsticulator2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ecstensor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        ecstensor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);*/
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -120,8 +120,6 @@ public class HardwareRobotTurela extends LinearOpMode {
         targetBL = currentmotorBL + (int) ((-deltaY + deltaX) * cpcm);
         targetFR = currentmotorFR + (int) ((deltaY - deltaX) * cpcm);
         targetFL = currentmotorFL + (int) ((-deltaY - deltaX) * cpcm);
-
-
          /*
          motorBR.setTargetPosition(currentmotorBR + (int) (( deltaY + deltaX) * cpcm));
          motorBL.setTargetPosition(currentmotorBL + (int) ((-deltaY + deltaX) * cpcm));
@@ -143,23 +141,7 @@ public class HardwareRobotTurela extends LinearOpMode {
         motorFL.setPower(speed);
         motorFR.setPower(speed);
 
-        /*Done = false;
-        while (!Done && opModeIsActive()) {
-            Done = true;
-            errorpos = Math.abs(targetBL - motorBL.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-
-            errorpos = Math.abs(targetBR - motorBR.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-
-            errorpos = Math.abs(targetFL - motorFL.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-
-            errorpos = Math.abs(targetFR - motorFR.getCurrentPosition());
-            if (errorpos > Maxerror) Done = false;
-        }*/
-
-        while(motorFR.isBusy() || motorFL.isBusy() || motorBR.isBusy() || motorBL.isBusy() && opModeIsActive());
+        while(intervalCheck(targetBL,10,motorBL.getCurrentPosition())||intervalCheck(targetFR,10,motorFR.getCurrentPosition())||intervalCheck(targetFL,10,motorFL.getCurrentPosition())||intervalCheck(targetBR,10,motorBR.getCurrentPosition()));
 
         motorBL.setPower(0);
         motorBR.setPower(0);
@@ -351,7 +333,12 @@ public class HardwareRobotTurela extends LinearOpMode {
         long lastTime = System.currentTimeMillis();
         while (lastTime + t > System.currentTimeMillis());
     }
-
+    public boolean intervalCheck(double mijl, double marg, double mot){
+        if(mot > mijl - marg && mot < mijl + marg){
+            return true;
+        }
+        return false;
+    }
     @Override
     public void runOpMode() throws InterruptedException {
 
