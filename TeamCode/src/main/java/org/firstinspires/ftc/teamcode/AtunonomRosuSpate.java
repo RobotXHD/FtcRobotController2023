@@ -50,7 +50,8 @@ public class AtunonomRosuSpate extends LinearOpMode {
                 if (height / width > 1.2 && height / width < 2.4) {
                     telemetry.addData("Rect", "1");
                     varrez = "Stanga";
-                } else if (height / width > 2.4) {
+                }
+                else if (height / width > 2.4) {
                     telemetry.addData("Rect", "2");
                     varrez = "Mijloc";
                 } else {
@@ -68,10 +69,9 @@ public class AtunonomRosuSpate extends LinearOpMode {
             telemetry.addData("caz", varrez);
         }
         if (!isStopRequested()) {
-            pdi.start();
             Autonom.start();
         }
-        while (!isStopRequested()) {
+        while (opModeIsActive()) {
             //telemetry.addData("turela:", f.turela.getCurrentPosition());
             //telemetry.addData("ecstensor:", f.ecstensor.getCurrentPosition());
             telemetry.addData("BRisBusy:", f.motorBR.isBusy());
@@ -90,7 +90,7 @@ public class AtunonomRosuSpate extends LinearOpMode {
         f.supramax.setPosition(0.8);
         f.kdf(200);
         f.target2(-750, 0.5);
-        f.kdf(100);
+        f.kdf(100);`
         f.targetime(-180, 0.1, f.turela,5000);
         f.kdf(200);
         f.targetime(-555, 0.5, f.ecstensor,1200);
@@ -104,20 +104,20 @@ public class AtunonomRosuSpate extends LinearOpMode {
         f.supramax.setPosition(1);
         f.targetime(-1400,0.5, f.alecsticulator1,1200);
         f.kdf(100);*/
-        f.Translatare(-30,0,0.5);
-        f.kdf(200);
-        f.Translatare(0, -130, 0.5);
+        f.TranslatareTimp(130,0,0.5,200);
+        f.kdf(500);
+        f.Translatare(0, 130, 0.5);
         if(varrez == "Stanga"){
-            f.Translatare(-130,0,0.5);
+            f.TranslatareTimp(-130,0,0.5,2000);
         }
         else if(varrez == "Dreapta"){
-            f.Translatare(130,0,0.5);
+            f.TranslatareTimp(130,0,0.5,2000);
         }
     });
     private final Thread pdi = new Thread(() -> {
         while (opModeIsActive()) {
             double pidResult;
-            f.turela.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(constants.kp,constants.ki,constants.kd,constants.kf));
+            //f.turela.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(constants.kp,constants.ki,constants.kd,constants.kf));
             /*if(ipd == true) {
                 pid.setSetpoint(poz2);
                 pidResult = pid.performPID(poz2);

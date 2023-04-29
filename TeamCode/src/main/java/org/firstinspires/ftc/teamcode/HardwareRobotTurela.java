@@ -6,6 +6,7 @@ import static org.firstinspires.ftc.teamcode.Var.Webcam_w;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -20,7 +21,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
 public class HardwareRobotTurela extends LinearOpMode {
 
     public DcMotorEx motorFR, motorFL, motorBR, motorBL;
-    public DcMotorEx ecstensor, turela;
+    public DcMotorEx ecstensor;
     public DcMotorEx alecsticulator1, alecsticulator2;
     public Servo crow;
     public Servo supramax;
@@ -72,7 +73,7 @@ public class HardwareRobotTurela extends LinearOpMode {
         motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        /*turela.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        /*
         alecsticulator1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         alecsticulator2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         ecstensor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);*/
@@ -82,7 +83,7 @@ public class HardwareRobotTurela extends LinearOpMode {
         motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        /*turela.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        /*
         alecsticulator1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         alecsticulator2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         ecstensor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);*/
@@ -116,16 +117,21 @@ public class HardwareRobotTurela extends LinearOpMode {
         currentmotorFL = motorFL.getCurrentPosition();
         currentmotorFR = motorFR.getCurrentPosition();
 
-        targetBR = currentmotorBR + (int) ((deltaY + deltaX) * cpcm);
+        /*(targetBR = currentmotorBR + (int) ((deltaY + deltaX) * cpcm);
         targetBL = currentmotorBL + (int) ((-deltaY + deltaX) * cpcm);
         targetFR = currentmotorFR + (int) ((deltaY - deltaX) * cpcm);
-        targetFL = currentmotorFL + (int) ((-deltaY - deltaX) * cpcm);
+        targetFL = currentmotorFL + (int) ((-deltaY - deltaX) * cpcm);*/
          /*
          motorBR.setTargetPosition(currentmotorBR + (int) (( deltaY + deltaX) * cpcm));
          motorBL.setTargetPosition(currentmotorBL + (int) ((-deltaY + deltaX) * cpcm));
          motorFR.setTargetPosition(currentmotorFR + (int) (( deltaY - deltaX) * cpcm));
          motorFL.setTargetPosition(currentmotorFL + (int) ((-deltaY - deltaX) * cpcm));
          */
+        targetBR = currentmotorBR + (int) ((deltaY + deltaX) * cpcm);
+        targetBL = currentmotorBL + (int) ((deltaY - deltaX) * cpcm);
+        targetFR = currentmotorFR + (int) ((-deltaY - deltaX) * cpcm);
+        targetFL = currentmotorFL + (int) ((-deltaY + deltaX) * cpcm);
+
         motorBL.setTargetPosition(targetBL);
         motorBR.setTargetPosition(targetBR);
         motorFL.setTargetPosition(targetFL);
@@ -137,11 +143,11 @@ public class HardwareRobotTurela extends LinearOpMode {
         motorFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         motorBL.setPower(speed);
-        motorBR.setPower(speed);
-        motorFL.setPower(speed);
-        motorFR.setPower(speed);
+        motorBR.setPower(0);
+        motorFL.setPower(0);
+        motorFR.setPower(0);
 
-        while(intervalCheck(targetBL,10,motorBL.getCurrentPosition())||intervalCheck(targetFR,10,motorFR.getCurrentPosition())||intervalCheck(targetFL,10,motorFL.getCurrentPosition())||intervalCheck(targetBR,10,motorBR.getCurrentPosition()));
+        while(motorBL.isBusy() && opModeIsActive());
 
         motorBL.setPower(0);
         motorBR.setPower(0);
@@ -153,7 +159,7 @@ public class HardwareRobotTurela extends LinearOpMode {
         motorFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
-    public void TranslatareTimp(int deltaX, int deltaY, double speed, long time) {
+    public void TranslatareTimp(int deltaX, int deltaY, double speed, int time) {
         boolean Done = false;
         int errorpos;
         int Maxerror = 20;
@@ -166,9 +172,9 @@ public class HardwareRobotTurela extends LinearOpMode {
         currentmotorFR = motorFR.getCurrentPosition();
 
         targetBR = currentmotorBR + (int) ((deltaY + deltaX) * cpcm);
-        targetBL = currentmotorBL + (int) ((-deltaY + deltaX) * cpcm);
+        targetBL = currentmotorBL + (int) ((-deltaY - deltaX) * cpcm);
         targetFR = currentmotorFR + (int) ((deltaY - deltaX) * cpcm);
-        targetFL = currentmotorFL + (int) ((-deltaY - deltaX) * cpcm);
+        targetFL = currentmotorFL + (int) ((-deltaY + deltaX) * cpcm);
 
 
          /*
@@ -207,8 +213,8 @@ public class HardwareRobotTurela extends LinearOpMode {
             errorpos = Math.abs(targetFR - motorFR.getCurrentPosition());
             if (errorpos > Maxerror) Done = false;
         }*/
-        long lT = System.currentTimeMillis();
-        while((motorFR.isBusy() || motorFL.isBusy() || motorBR.isBusy() || motorBL.isBusy()) || lT + time > System.currentTimeMillis());
+        kdf(time);
+        while(motorFR.isBusy() || motorFL.isBusy() || motorBR.isBusy() || motorBL.isBusy() && opModeIsActive());
         motorBL.setPower(0);
         motorBR.setPower(0);
         motorFL.setPower(0);
@@ -333,12 +339,7 @@ public class HardwareRobotTurela extends LinearOpMode {
         long lastTime = System.currentTimeMillis();
         while (lastTime + t > System.currentTimeMillis());
     }
-    public boolean intervalCheck(double mijl, double marg, double mot){
-        if(mot > mijl - marg && mot < mijl + marg){
-            return true;
-        }
-        return false;
-    }
+
     @Override
     public void runOpMode() throws InterruptedException {
 

@@ -73,7 +73,6 @@ public class AtunonomAlbastruSpate extends LinearOpMode {
             telemetry.addData("caz", varrez);
         }
         if (!isStopRequested()) {
-            pdi.start();
             Autonom.start();
         }
         while (!isStopRequested()) {
@@ -109,7 +108,7 @@ public class AtunonomAlbastruSpate extends LinearOpMode {
             f.kdf(100);*/
             f.TranslatareTimp(30, 0, 0.5, 2000);
             f.kdf(200);
-            f.TranslatareTimp(0, -130, 0.5, 2000);
+            f.TranslatareTimp(0, 130, 0.5, 2000);
             if (varrez == "Stanga") {
                 f.TranslatareTimp(-130, 0, 0.5, 2000);
             } else if (varrez == "Dreapta") {
@@ -120,7 +119,7 @@ public class AtunonomAlbastruSpate extends LinearOpMode {
     private final Thread pdi = new Thread(() -> {
         while (opModeIsActive()) {
             double pidResult;
-            f.turela.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(constants.kp,constants.ki,constants.kd,constants.kf));
+            //f.turela.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(constants.kp,constants.ki,constants.kd,constants.kf));
             /*if(ipd == true) {
                 pid.setSetpoint(poz2);
                 pidResult = pid.performPID(poz2);
