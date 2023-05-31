@@ -58,6 +58,9 @@ public class HardwareRobotTurela extends LinearOpMode {
         //touchL = hardwareMap.get(TouchSensor.class, "touchL");
         //touchR = hardwareMap.get(TouchSensor.class, "touchR");
 
+        motorBL.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFL.setDirection(DcMotorSimple.Direction.REVERSE);
+
         motorBL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorBR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motorFL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -91,7 +94,7 @@ public class HardwareRobotTurela extends LinearOpMode {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         webcam.setPipeline(pipeline);
-
+        webcam.setMillisecondsPermissionTimeout(2500);
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
@@ -172,9 +175,9 @@ public class HardwareRobotTurela extends LinearOpMode {
         currentmotorFR = motorFR.getCurrentPosition();
 
         targetBR = currentmotorBR + (int) ((deltaY + deltaX) * cpcm);
-        targetBL = currentmotorBL + (int) ((-deltaY - deltaX) * cpcm);
+        targetBL = currentmotorBL + (int) ((deltaY - deltaX) * cpcm);
         targetFR = currentmotorFR + (int) ((deltaY - deltaX) * cpcm);
-        targetFL = currentmotorFL + (int) ((-deltaY + deltaX) * cpcm);
+        targetFL = currentmotorFL + (int) ((deltaY + deltaX) * cpcm);
 
 
          /*

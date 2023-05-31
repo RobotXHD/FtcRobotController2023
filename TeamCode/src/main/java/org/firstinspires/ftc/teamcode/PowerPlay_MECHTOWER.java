@@ -48,7 +48,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
     private int apoz = 0;
     private long spasmCurrentTime = 0;
     private long pidTime = 0;
-    public double difference,medie;
+    public double difference,medie,poz2=0;
     public double medii[] = new double[10];
     public boolean rotating = false,inAutomatizare = true;
     public double realAngle, targetAngle;
@@ -120,16 +120,6 @@ public class PowerPlay_MECHTOWER extends OpMode {
         articulator2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         extensor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        motorFR.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        motorFL.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        motorBR.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        motorBL.setMode(DcMotor.RunMode.RESET_ENCODERS);
-
-        //turela.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        articulator1.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        articulator2.setMode(DcMotor.RunMode.RESET_ENCODERS);
-        extensor.setMode(DcMotor.RunMode.RESET_ENCODERS);
-
         motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -194,10 +184,10 @@ public class PowerPlay_MECHTOWER extends OpMode {
                         correction = 0.0;
                     }
                 }*/
-                pmotorFL = y + x + rx + rx2;
+                pmotorFL = -y + x + rx + rx2;
                 pmotorBL = -y - x + rx + rx2;
                 pmotorBR = -y + x - rx - rx2;
-                pmotorFR = y - x - rx - rx2;
+                pmotorFR = -y - x - rx - rx2;
 
                 max = abs(pmotorFL);
                 if (abs(pmotorFR) > max) {
@@ -299,11 +289,13 @@ public class PowerPlay_MECHTOWER extends OpMode {
                     //colagen+=0.005;
                     claw.setPosition(1);
                }
-
-                if(gamepad2.x)
-                    clawRotation.setPosition(0.95);
-                if(gamepad2.y)
-                    clawRotation.setPosition(0.25);
+                if (gamepad1.right_trigger > 0 && poz2 <= 0.98){
+                    poz2+= 0.002;
+                }
+                if(gamepad1.left_trigger > 0 && poz2 >= 0.02 ){
+                    poz2-= 0.002;
+                }
+                clawRotation.setPosition(poz2);
 
                 if(gamepad2.dpad_down){
                     f.Rotire(75,0.5);
