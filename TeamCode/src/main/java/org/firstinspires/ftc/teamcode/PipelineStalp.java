@@ -90,8 +90,8 @@ public class PipelineStalp extends OpenCvPipeline {
             //face un dreptunghi care acopera toata aria de detectare cu alb
             Imgproc.rectangle(
                     rect,
-                    new Point(CV_rect_x1, CV_rect_y1),
-                    new Point(CV_rect_x2, CV_rect_y2),
+                    new Point(GaCV_rect_x1, GaCV_rect_y1),
+                    new Point(GaCV_rect_x2, GaCV_rect_y2),
                     new Scalar(255),
                     Imgproc.FILLED
             );

@@ -2,9 +2,12 @@ package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.Var.Webcam_h;
 import static org.firstinspires.ftc.teamcode.Var.Webcam_w;
+import static org.firstinspires.ftc.teamcode.VarPipelineStalp.offsetWebcamG;
 import static org.firstinspires.ftc.teamcode.constants.cd;
 import static org.firstinspires.ftc.teamcode.constants.ci;
 import static org.firstinspires.ftc.teamcode.constants.cp;
+
+import static java.lang.Math.abs;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -27,10 +30,11 @@ public class OpenCVTest3 extends OpMode {
     int currentmotorFL;
     int currentmotorFR;
     double correction;
+    int target;
     PidControllerAdevarat pid = new PidControllerAdevarat(cp,ci,cd);
     static final double COUNTSPERR = 383.6;
     static final double GEARREDUCTION = 1;
-    public boolean prinde = false, stop = false;
+    public boolean prinde = false, stop = false, ok = false;
     static final double DIAMROT = 9.6;
     static final double COUNTS_PER_CM = (COUNTSPERR*GEARREDUCTION) / (DIAMROT*3.1415);
     private double width, height,x,y;
@@ -45,18 +49,20 @@ public class OpenCVTest3 extends OpMode {
     private DcMotorEx motorBR;
     private DcMotorEx motorFL;
     private DcMotorEx motorFR;
+    public double motorPower = 0.0;
     void POWER(double df1, double sf1, double ds1, double ss1){
-        motorFR.setPower(df1);
-        motorBL.setPower(ss1);
-        motorFL.setPower(sf1);
-        motorBR.setPower(ds1);
+        motorFR.setVelocity(df1);
+        motorBL.setVelocity(ss1);
+        motorFL.setVelocity(sf1);
+        motorBR.setVelocity(ds1);
     }
     public void telemetrie(){
         telemetry.addData("Rectangle Width:", width);
         telemetry.addData("Rectangle Height:", height);
         telemetry.addData("Rectangle x:", x);
         telemetry.addData("Rectangle y:", y);
-
+        telemetry.addData("ok",ok);
+        telemetry.addData("motorPower:",motorPower);
         telemetry.addData("setpoint:",pid.getSetpoint());
         telemetry.addData("error",pid.getError());
         telemetry.addData("correction",correction);
@@ -116,20 +122,29 @@ public class OpenCVTest3 extends OpMode {
     @Override
     public void loop() {
         pid.setPID(cp,ci,cd);
-            webcam.setPipeline(pipelineRosu);
-            try {
-                width = pipelineRosu.getRect().width;
-                height = pipelineRosu.getRect().height;
-                x = pipelineRosu.getRect().x;
-                y = pipelineRosu.getRect().y;
-                correction = pid.performPID(x + width / 2);
-                POWER(correction,-correction,-correction,correction);
-                telemetry.addData("da","da");
-                telemetrie();
+        webcam.setPipeline(pipelineRosu);
+        try {
+            width = pipelineRosu.getRect().width;
+            x = pipelineRosu.getRect().x;
+            /*correction = pid.performPID(x + width / 2 + offsetWebcamG);
+            target = (int)(motorBL.getCurrentPosition() - pid.getError());
+            if(pid.getError() > 2 || pid.getError() < -2){
+                motorPower = correction / abs(pid.getError());
             }
-            catch (Exception E) {
-                telemetry.addData("Webcam Error:", E);
-                telemetry.update();
+            else{
+                motorPower = 0;
             }
+            POWER(motorPower,-motorPower,-motorPower,motorPower);*/
+            correction = pid.performPID(x + width / 2);
+            if(correction >= -2 && correction <= 2){
+                correction = 0;
+            }
+            POWER(correction,-correction,-correction,correction);
+            telemetrie();
+        }
+        catch (Exception E) {
+            telemetry.addData("Webcam Error:", E);
+            telemetry.update();
+        }
     }
 }

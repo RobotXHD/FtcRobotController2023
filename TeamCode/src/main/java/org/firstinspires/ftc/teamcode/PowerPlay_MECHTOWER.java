@@ -28,7 +28,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
     private Servo clawRotation;
     double sm = 1, ms = 1.5,ms2 = 1;
     private BNO055IMU imu;
-    double y, x, rx, rx2;
+    double y, x, rx, rx2,brat;
     double max = 0;
     double pmotorBL;
     double pmotorBR;
@@ -164,7 +164,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
                 y  = gamepad1.left_stick_y;
                 x  = gamepad1.left_stick_x;
                 rx = gamepad1.right_stick_x;
-                //rx2 = gamepad2.right_stick_x / 7;
+                rx2 = gamepad2.right_stick_x / 7;
                 /*
                 pid.setPID(constants.pGyro,constants.iGyro,constants.dGyro);
                 if(clockwise != 0.0){
@@ -258,10 +258,10 @@ public class PowerPlay_MECHTOWER extends OpMode {
 //                }
 
                 ylast = gamepad2.y;
-                    articulator1.setPower(gamepad2.right_stick_y / 1.5);
-                    articulator2.setPower(-gamepad2.right_stick_y / 1.5);
+                    articulator1.setPower(-gamepad2.right_stick_y / 2);
+                    articulator2.setPower(gamepad2.right_stick_y / 2);
                 /*if(!touchL.isPressed() && !touchR.isPressed()) {
-                    turela.setPower((gamepad2.left_trigger/ms - gamepad2.right_trigger/ms)/1.4);
+                    turela.setPower((gamepad2.left_trigger/ms - gamepad2.right_trigger/ms)0/1.4);
                 }
                 else if(touchR.isPressed() && !inAutomatizare) {
                     turela.setPower(-0.06);
@@ -271,8 +271,6 @@ public class PowerPlay_MECHTOWER extends OpMode {
                     turela.setPower(0.06);
                     inAutomatizare = true;
                 }*/
-                    articulator1.setPower(gamepad2.right_stick_y/1.5);
-                    articulator2.setPower(-gamepad2.right_stick_y/1.5);
                 inAutomatizare = false;
                 if(gamepad2.left_bumper && colagen <= 1){
                     colagen+=0.001;
@@ -289,14 +287,19 @@ public class PowerPlay_MECHTOWER extends OpMode {
                     //colagen+=0.005;
                     claw.setPosition(1);
                }
-                if (gamepad1.right_trigger > 0 && poz2 <= 0.98){
+                /*if (gamepad2.right_trigger > 0 && poz2 <= 0.98){
                     poz2+= 0.002;
                 }
-                if(gamepad1.left_trigger > 0 && poz2 >= 0.02 ){
+                if(gamepad2.left_trigger > 0 && poz2 >= 0.02 ){
                     poz2-= 0.002;
-                }
+                }*/
+                if(gamepad2.x)
+                    poz2=0.0;
+                if(gamepad2.y)
+                    poz2=0.7;
                 clawRotation.setPosition(poz2);
 
+//0.02 0.66
                 if(gamepad2.dpad_down){
                     f.Rotire(75,0.5);
                     f.kdf(200);
@@ -359,6 +362,7 @@ public class PowerPlay_MECHTOWER extends OpMode {
         telemetry.addData("articulator1:", articulator1.getCurrentPosition());
         telemetry.addData("articulator2:", articulator2.getCurrentPosition());
         telemetry.addData("clawArticulation:", clawArticulation.getPosition());
+        telemetry.addData("clawRotation:", clawRotation.getPosition());
         telemetry.addData("colagen:", colagen);
         telemetry.addData("claw:", claw.getPosition());
         telemetry.addData("sm:",sm);
